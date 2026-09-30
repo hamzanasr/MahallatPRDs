@@ -338,7 +338,7 @@ def admin_shell(side_html, title, body, sub=''):
 
 
 def a_pricing(side):
-    hdr = '<div class="row sp"><b class="t18">Taxi · الفئات والتسعيرة</b><div class="row"><span class="pill k">الرياض</span><span class="sbt p">حفظ بتاريخ سريان</span></div></div>'
+    hdr = '<div class="row sp"><b class="t18">Taxi · الفئات والتسعيرة</b><div class="row"><span class="pill k">النطاق: الرياض</span><span class="sbt p">حفظ بتاريخ سريان</span></div></div>'
     tbl = ('<div class="pan"><h6>تسعيرة الفئات في المدينة (أرقام تجريبية)</h6><table class="tbl2 sm"><tr><th>الفئة</th><th>المقاعد</th><th>أساسي</th><th>للكيلو</th><th>للدقيقة</th><th>الحد الأدنى</th><th>نسبة المنصة</th><th>الحالة</th></tr>'
            '<tr><td>اقتصادي</td><td>4</td><td class="n">5.00</td><td class="n">1.60</td><td class="n">0.30</td><td class="n">10.00</td><td class="n">20%</td><td><span class="pill g">مفعّلة</span></td></tr>'
            '<tr><td>مريح</td><td>4</td><td class="n">7.00</td><td class="n">2.10</td><td class="n">0.40</td><td class="n">14.00</td><td class="n">20%</td><td><span class="pill g">مفعّلة</span></td></tr>'
