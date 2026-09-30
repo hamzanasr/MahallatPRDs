@@ -69,7 +69,6 @@
     if (el) go(el, el.tagName === 'DETAILS');
   }
   addEventListener('hashchange', function () { fromHash(); spy(); });
-  fromHash();
   addEventListener('load', function () { setTimeout(spy, 60); });
 
   /* ---------- فتح/إغلاق صفحات اللوحات ---------- */
@@ -89,7 +88,7 @@
   });
 
   /* ---------- فهرس المتطلبات ---------- */
-  var reqs = $$('details.req');
+  var reqs = $$('#catalog details.req[id]');
   var q = $('#cat-q'), mod = $('#cat-mod'), pri = $('#cat-pri'), count = $('#cat-count'), empty = $('#cat-empty');
   var priVal = '';
   function nz(s) {
@@ -236,4 +235,5 @@
 
   /* ---------- الطباعة: افتح كل شيء ---------- */
   addEventListener('beforeprint', function () { $$('details').forEach(function (d) { d.open = true; }); });
+  fromHash();
 })();

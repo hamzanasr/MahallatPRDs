@@ -306,7 +306,11 @@
 .mock .rule{display:flex;gap:8px;align-items:center;padding:6px 8px;border-radius:9px;background:var(--bg);font-size:11.5px}
 .mock .rule .tgl{margin-inline-start:auto}
 .mock .wb.wx{width:1180px}
+/* محتوى صفحات اللوحات؛ القائمة المشتركة مرسومة مرة واحدة لكل لوحة. */
+.mock .wb.compact{width:770px}
+.mock .wb.wx.compact{width:1012px}
 .mock .wb.wx .wmain{grid-template-columns:168px 1fr;min-height:640px}
+.mock .wb.compact .wmain{grid-template-columns:minmax(0,1fr)}
 .mock .sbt{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--l);background:var(--c);border-radius:8px;padding:4px 10px;font-size:11.5px;font-weight:600;white-space:nowrap}
 .mock .sbt.p{background:var(--p);border-color:var(--p);color:#fff}
 .mock .sbt.r{color:var(--r);border-color:#F4C2BD}

@@ -501,6 +501,10 @@ page = open(os.path.join(HERE, 'template.html'), encoding='utf8').read()
 page = (page.replace('{{NAV}}', '\n'.join(nav)).replace('{{BODY}}', '\n'.join(body))
         .replace('{{N_REQ}}', str(N_REQ)).replace('{{VERSION}}', review.VERSION).replace('{{DATE}}', review.DATE).replace('{{N_SECTIONS}}', str(n))
         .replace('{{N_SCREENS}}', str(n_screens)).replace('{{N_PAGES}}', str(n_pages)))
+import owner_update
+page = owner_update.apply(page)
+import clean_document
+page = clean_document.apply(page)
 os.makedirs(os.path.join(OUT, 'assets'), exist_ok=True)
 open(os.path.join(OUT, 'index.html'), 'w', encoding='utf8').write(page)
 lang.dump()
