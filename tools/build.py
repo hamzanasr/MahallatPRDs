@@ -4,9 +4,8 @@ import re, html, json, os, sys
 from bs4 import BeautifulSoup, NavigableString, Tag
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-ROOT = os.path.dirname(HERE)
-SRC = sys.argv[1] if len(sys.argv) > 1 else os.path.join(HERE, 'delivery-spec.html')   # الملف الأصلي (غير مرفوع)
-OUT = ROOT
+SRC = sys.argv[1] if len(sys.argv) > 1 else os.path.join(HERE, 'delivery-spec.html')
+OUT = os.path.dirname(HERE)
 
 soup = BeautifulSoup(open(SRC, encoding='utf8').read(), 'lxml')
 for t in soup(['style', 'script']):
@@ -14,7 +13,13 @@ for t in soup(['style', 'script']):
 main = soup.find('main')
 S = {x['id']: x for x in main.find_all('section', recursive=False)}
 import patches
+import lang
 patches.patch_sections(S, soup)
+import review
+review.fix_sections(S, soup)
+import review_front, review_more
+review_more.extract_shared(S, soup)
+review_more.finance_and_wording(S, soup)
 
 
 # ------------------------------------------------------------------ helpers
@@ -92,6 +97,8 @@ for mod in cat.select('#mods > div.mod'):
         REQ_IDS.add(rid)
     MODS.append(m)
 MODS = patches.patch_catalog(MODS)
+MODS = review.fix_catalog(MODS)
+MODS = review_more.catalog_wording(MODS)
 REQ_IDS = {r['id'] for m in MODS for r in m['reqs']}
 N_REQ = sum(len(m['reqs']) for m in MODS)
 assert N_REQ == 267 - 15 + 3, N_REQ
@@ -165,23 +172,9 @@ def sec_html(sec):
     return inner(sec)
 
 
-# ---------------- 1. ابدأ من هنا (مكتوب من جديد بعد حذف الملخص المكرر)
-add('start', 'ابدأ من هنا', 'البداية', '''
-<p class="sub">هذا الملف مرجع بناء المنصة كاملة. ليس مطلوباً أن تقرأه كله دفعة واحدة، وهذا الترتيب المقترح:</p>
-<ol class="steps">
-<li><div><b>قواعد العمل</b>تفصيل كل قاعدة: الطلب، التاجر، التسليم، أنواع المتاجر، الرسوم، المناديب وأداؤهم، العروض والولاء، المدن، Taxi، الصيدليات، الإشعارات، والتحسينات.</div></li>
-<li><div><b>الواجهات</b>شكل كل تطبيق ولوحة، شاشة شاشة، وما يظهر في كل صفحة من أرقام وتقارير وخيارات، وقائمة تقارير التاجر والإدارة.</div></li>
-<li><div><b>للتنفيذ</b>البناء وقابلية التطوير، والإطلاق والتشغيل، والربط مع الخدمات، والقيم المرنة، وفهرس المتطلبات بمعرّفاتها ومعايير قبولها.</div></li>
-</ol>
-<h3>قبل ما تبدأ</h3>
-<ul class="rules">
-<li>التقنية المقترحة وبنية النظام وترتيب البناء في «البناء وقابلية التطوير». الرقم الوحيد المربوط بمزود هو مدة الطريق للغرامات من خرائط جوجل، وتُحفظ على الطلب.</li>
-<li>التطبيق الجديد ينزل تحديثاً للتطبيق الحالي، وخطة نقل البيانات في «الإطلاق والتشغيل».</li>
-<li>التصاميم والهوية البصرية ليست من مسؤولية المبرمج. هذا المرجع يصف المحتوى والسلوك، لا الشكل.</li>
-<li>كل قيمة موصوفة بأنها «مرنة» تُعدَّل من لوحة الإدارة، ولا تُكتب ثابتة في الكود. قائمتها كاملة في «القيم المرنة».</li>
-<li>لكل متطلب معرّف ثابت مثل <a class="rid" href="#ORD-003">ORD-003</a>، يُستخدم في المهام والتسعير والاختبار، ولكل متطلب معيار قبول لا يُعد منتهياً إلا إذا تحقق. كل معرّف في الصفحة رابط يفتح متطلبه في «فهرس المتطلبات».</li>
-</ul>
-''')
+# ---------------- 1. أقسام البداية (ابدأ من هنا، النطاق، القرارات المفتوحة، المصطلحات)
+for _d in review_front.front_sections(MODS):
+    add(_d['id'], _d['title'], _d['part'], _d['html'])
 
 # ---------------- 2. المنصة في صفحة
 sec = get('overview')
@@ -402,6 +395,9 @@ def render_pages(sec, group_order=None):
     return ''.join('<h3>%s</h3><div class="pages">%s</div>' % (esc(c), ''.join(items)) for c, items in groups)
 
 
+_d = review_more.shared_section()
+add(_d['id'], _d['title'], _d['part'], _d['html'])
+
 # لوحة التاجر + تقاريرها
 sec = S['merchant-dash']
 mer_html = str(sec.find('p', class_='sub')) + render_pages(sec)
@@ -412,10 +408,6 @@ add('merchant-dash', 'لوحة التاجر', 'الواجهات', mer_html)
 # لوحة الإدارة + قواعدها + تقاريرها
 sec = S['admin-pages']
 adm_html = str(sec.find('p', class_='sub')) + render_pages(sec)
-rules_h3 = [h for h in sec.find_all('h3', recursive=False) if 'قواعد لكل صفحات' in h.get_text()][0]
-rules_ul = rules_h3.find_next_sibling('ul')
-gloss = sec.select_one('details.req .tbl')
-adm_html += '<h3>قواعد لكل صفحات اللوحة</h3>' + str(rules_ul) + '<h3>تعريف المؤشرات</h3>' + str(gloss)
 rep = get('admin-reports')
 adm_html += '<h3>تقارير الإدارة</h3>' + inner(rep)
 add('admin-pages', 'لوحة الإدارة', 'الواجهات', adm_html)
@@ -424,7 +416,8 @@ add('admin-pages', 'لوحة الإدارة', 'الواجهات', adm_html)
 add('build', 'البناء وقابلية التطوير', 'للتنفيذ', sec_html(get('build')))
 add('launch', 'الإطلاق والتشغيل', 'للتنفيذ', sec_html(get('launch')))
 add('services', 'الربط مع الخدمات الأخرى', 'للتنفيذ', sec_html(get('services')))
-add('settings', 'القيم المرنة', 'للتنفيذ', sec_html(get('settings')))
+_d = review_more.settings_section(S)
+add(_d['id'], _d['title'], _d['part'], _d['html'])
 
 
 # ---- فهرس المتطلبات
@@ -458,6 +451,8 @@ cat_html.append('<p class="empty" id="cat-empty" hidden>لا توجد نتائج
 add('catalog', 'فهرس المتطلبات', 'للتنفيذ', ''.join(cat_html))
 
 add('delivery', 'التسليم والقبول', 'للتنفيذ', sec_html(get('delivery')))
+_d = review_more.changelog_section(N_REQ)
+add(_d['id'], _d['title'], _d['part'], _d['html'])
 
 # ------------------------------------------------------------------ تجميع الصفحة
 PARTS = []
@@ -477,6 +472,7 @@ for pname, secs in PARTS:
         s['n'] = n
         nav.append('<a href="#%s" data-sec="%s"><i>%d</i>%s</a>' % (s['id'], s['id'], n, esc(s['title'])))
         frag = BeautifulSoup('<div>' + s['html'] + '</div>', 'lxml').find('div')
+        lang.process(frag, s['id'])
         if s['id'] != 'catalog':
             linkify(frag)
         # جداول: لفّها للتمرير الأفقي (موجودة أصلاً داخل .tbl) وتأكد من عدم وجود جداول عارية
@@ -496,8 +492,10 @@ n_pages = len(S['merchant-dash'].select('section.ppanel')) + len(S['admin-pages'
 
 page = open(os.path.join(HERE, 'template.html'), encoding='utf8').read()
 page = (page.replace('{{NAV}}', '\n'.join(nav)).replace('{{BODY}}', '\n'.join(body))
-        .replace('{{N_REQ}}', str(N_REQ)).replace('{{N_SECTIONS}}', str(n))
+        .replace('{{N_REQ}}', str(N_REQ)).replace('{{VERSION}}', review.VERSION).replace('{{DATE}}', review.DATE).replace('{{N_SECTIONS}}', str(n))
         .replace('{{N_SCREENS}}', str(n_screens)).replace('{{N_PAGES}}', str(n_pages)))
 os.makedirs(os.path.join(OUT, 'assets'), exist_ok=True)
 open(os.path.join(OUT, 'index.html'), 'w', encoding='utf8').write(page)
+lang.dump()
+print('تحريرات صياغة مطبّقة:', lang.APPLIED['n'])
 print('sections', n, 'requirements', N_REQ, 'screens', n_screens, 'dashboard pages', n_pages, 'bytes', len(page.encode('utf8')))

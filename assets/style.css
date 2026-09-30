@@ -264,3 +264,20 @@ footer{color:var(--muted);font-size:14px;padding-top:16px;border-top:1px solid v
   .tbl{overflow:visible}
   table{min-width:0!important}
 }
+
+/* ========== جداول القرارات ========== */
+.dec table{min-width:1200px}
+.dec td:first-child{white-space:nowrap;font-weight:700;color:var(--accent)}
+.dec td{font-size:14px}
+
+/* جدول القرارات على الجوال: كل صف بطاقة */
+@media (max-width:760px){
+  .dec{border:0;background:none;overflow:visible}
+  .dec table,.dec tbody,.dec tr,.dec td{display:block;min-width:0;width:100%}
+  .dec thead{display:none}
+  .dec tr{background:var(--surface);border:1px solid var(--line);border-radius:12px;margin-bottom:12px;padding:6px 4px}
+  .dec td{border:0;padding:7px 12px}
+  .dec td::before{content:attr(data-l);display:block;font-size:12.5px;font-weight:600;color:var(--muted);margin-bottom:2px}
+  .dec td:first-child::before{display:none}
+  .dec td:first-child{font-size:16px}
+}

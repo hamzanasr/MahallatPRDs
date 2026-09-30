@@ -226,6 +226,14 @@
     else if (e.key === 'Escape') menu(false);
   });
 
+  /* ---------- جداول القرارات: تسميات الأعمدة للعرض على الجوال ---------- */
+  $$('.dec table').forEach(function (t) {
+    var h = $$('thead th', t).map(function (x) { return x.textContent.trim(); });
+    $$('tbody tr', t).forEach(function (tr) {
+      $$('td', tr).forEach(function (td, i) { td.setAttribute('data-l', h[i] || ''); });
+    });
+  });
+
   /* ---------- الطباعة: افتح كل شيء ---------- */
   addEventListener('beforeprint', function () { $$('details').forEach(function (d) { d.open = true; }); });
 })();
