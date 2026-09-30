@@ -20,6 +20,7 @@ review.fix_sections(S, soup)
 import review_front, review_more
 review_more.extract_shared(S, soup)
 review_more.finance_and_wording(S, soup)
+review_more.taxi_launch(S, soup)
 
 
 # ------------------------------------------------------------------ helpers
@@ -99,6 +100,7 @@ for mod in cat.select('#mods > div.mod'):
 MODS = patches.patch_catalog(MODS)
 MODS = review.fix_catalog(MODS)
 MODS = review_more.catalog_wording(MODS)
+MODS = review_more.taxi_catalog(MODS)
 REQ_IDS = {r['id'] for m in MODS for r in m['reqs']}
 N_REQ = sum(len(m['reqs']) for m in MODS)
 assert N_REQ == 267 - 15 + 3, N_REQ
