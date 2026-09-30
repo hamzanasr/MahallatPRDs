@@ -86,7 +86,11 @@ def process(frag, sid):
     for e, inner in list(candidates(frag)):
         k = key(inner)
         if DUMP:
-            BLOCKS[k] = {'s': sid, 'h': inner}
+            role = 'other'
+            if e.name == 'li' and e.find_parent(class_='rbody'):
+                h5 = e.find_parent('div').find('h5')
+                role = 'accept' if h5 and 'القبول' in h5.get_text() else 'rule'
+            BLOCKS[k] = {'s': sid, 'h': inner, 'r': role}
             continue
         new = ed.get(k)
         if new and new.strip() != inner and valid(inner, new) is None:

@@ -23,6 +23,7 @@ review_more.finance_and_wording(S, soup)
 review_more.taxi_launch(S, soup)
 import taxi_content
 taxi_content.apply_sections(S, soup)
+review_more.adopt_decisions(S, soup)
 
 
 # ------------------------------------------------------------------ helpers
@@ -104,6 +105,7 @@ MODS = review.fix_catalog(MODS)
 MODS = review_more.catalog_wording(MODS)
 MODS = review_more.taxi_catalog(MODS)
 MODS = taxi_content.apply_catalog(MODS)
+MODS = review_more.adopt_catalog(MODS)
 REQ_IDS = {r['id'] for m in MODS for r in m['reqs']}
 N_REQ = sum(len(m['reqs']) for m in MODS)
 assert N_REQ == 267 - 15 + 3 + 20 + 1, N_REQ
