@@ -5,7 +5,7 @@ from bs4 import BeautifulSoup
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 EDIT_DIR = os.path.join(HERE, 'edits')
-SKIP_SECTIONS = {'start', 'scope', 'decisions', 'glossary', 'changelog', 'shared-rules'}
+SKIP_SECTIONS = {'start', 'scope', 'decisions', 'glossary', 'changelog', 'shared-rules', 'taxi'}
 DUMP = os.environ.get('LANG_DUMP') == '1'
 BLOCKS = {}
 APPLIED = {'n': 0}

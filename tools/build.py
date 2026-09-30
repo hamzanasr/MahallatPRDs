@@ -21,6 +21,8 @@ import review_front, review_more
 review_more.extract_shared(S, soup)
 review_more.finance_and_wording(S, soup)
 review_more.taxi_launch(S, soup)
+import taxi_content
+taxi_content.apply_sections(S, soup)
 
 
 # ------------------------------------------------------------------ helpers
@@ -101,9 +103,10 @@ MODS = patches.patch_catalog(MODS)
 MODS = review.fix_catalog(MODS)
 MODS = review_more.catalog_wording(MODS)
 MODS = review_more.taxi_catalog(MODS)
+MODS = taxi_content.apply_catalog(MODS)
 REQ_IDS = {r['id'] for m in MODS for r in m['reqs']}
 N_REQ = sum(len(m['reqs']) for m in MODS)
-assert N_REQ == 267 - 15 + 3, N_REQ
+assert N_REQ == 267 - 15 + 3 + 20 + 1, N_REQ
 
 
 def prio(tags):
@@ -291,7 +294,7 @@ add('loyalty', 'الولاء ودعوة صديق', 'قواعد العمل', sec_
 add('zones', 'المدن', 'قواعد العمل', sec_html(get('zones')))
 
 # ---------------- 18. Taxi
-add('taxi', 'Taxi', 'قواعد العمل', sec_html(get('taxi')))
+add('taxi', 'Taxi', 'قواعد العمل', taxi_content.taxi_section_html())
 
 # ---------------- 19. الصيدليات
 sec = get('pharmacy')
