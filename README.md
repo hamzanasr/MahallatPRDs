@@ -2,8 +2,7 @@
 
 موقع متجاوب (عربي/RTL) يعرض مواصفات المنصة بلا تكرار: القواعد، والواجهات، والمتطلبات بمعايير قبولها.
 
-- **`site/`** الموقع الجاهز. افتح `site/index.html` أو شغّل خادماً ثابتاً: `python -m http.server --directory site`
-- **`delivery-spec.html`** الملف الأصلي (المصدر).
-- **`tools/`** سكربتات البناء: `python tools/build.py` يعيد بناء الموقع من الملف الأصلي، و`tools/patches.py` فيه قرارات المالك المطبّقة فوقه (حذف متطلبات، أولويات، المارت، Taxi في غرفة العمليات…). يحتاج `beautifulsoup4` و`lxml`.
+- **`index.html`** و**`assets/`** الموقع الجاهز في جذر المستودع (للنشر المباشر على Cloudflare Pages أو GitHub Pages). شغّله محلياً بـ: `python -m http.server`
+- **`tools/`** سكربتات البناء: `python tools/build.py` يعيد بناء `index.html` من الملف الأصلي، و`tools/patches.py` فيه قرارات المالك المطبّقة فوقه (حذف متطلبات، أولويات، المارت، Taxi في غرفة العمليات…). يحتاج `beautifulsoup4` و`lxml`. الملف الأصلي `delivery-spec.html` غير مرفوع في المستودع (ليبقى الجذر للموقع فقط): ضعه داخل `tools/` أو مرّر مساره: `python tools/build.py path/to/delivery-spec.html`.
 
 المزايا: بحث شامل (`/` أو `Ctrl+K`)، فهرس متطلبات بفلاتر، وضع فاتح/داكن، وطباعة تفتح كل التفاصيل.

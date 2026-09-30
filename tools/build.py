@@ -5,8 +5,8 @@ from bs4 import BeautifulSoup, NavigableString, Tag
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
-SRC = os.path.join(ROOT, 'delivery-spec.html')
-OUT = os.path.join(ROOT, 'site')
+SRC = sys.argv[1] if len(sys.argv) > 1 else os.path.join(HERE, 'delivery-spec.html')   # الملف الأصلي (غير مرفوع)
+OUT = ROOT
 
 soup = BeautifulSoup(open(SRC, encoding='utf8').read(), 'lxml')
 for t in soup(['style', 'script']):

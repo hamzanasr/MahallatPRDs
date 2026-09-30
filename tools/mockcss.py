@@ -1,7 +1,7 @@
 import os
 ROOT=os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 import re
-raw=open(os.path.join(ROOT,'delivery-spec.html'),encoding='utf8').read()
+raw=open(__import__('sys').argv[1] if len(__import__('sys').argv)>1 else os.path.join(os.path.dirname(os.path.abspath(__file__)),'delivery-spec.html'),encoding='utf8').read()
 raw=raw[raw.index('/* ---- product palette (fixed) ---- */'):]
 raw=raw[:raw.index('</style>')]
 def cut(txt,start,end):
@@ -47,5 +47,5 @@ for r in rules:
 out='\n'.join(res)
 # the .mk-shot zoom media
 out=out.replace('.mock .mk-shot .wb.wx','.mock .wb.wx')
-open(os.path.join(ROOT,'site','assets','mock.css'),'w',encoding='utf8').write('/* نماذج الشاشات المرسومة: كل القواعد مقيّدة بـ .mock حتى لا تتأثر بقية الصفحة */\n'+out+'\n')
+open(os.path.join(ROOT,'assets','mock.css'),'w',encoding='utf8').write('/* نماذج الشاشات المرسومة: كل القواعد مقيّدة بـ .mock حتى لا تتأثر بقية الصفحة */\n'+out+'\n')
 print(len(res),'rules',len(out),'bytes; dropped',len(dropped)); print(dropped[:40])
