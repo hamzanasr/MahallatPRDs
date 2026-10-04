@@ -1,0 +1,94 @@
+# -*- coding: utf-8 -*-
+"""أدوات مشتركة لبناء موقع المتطلبات (الإصدار 4) من ملف المالك."""
+import json, re, os, html
+HERE = os.path.dirname(os.path.abspath(__file__))
+
+D = json.load(open(os.path.join(HERE, 'newprd.json'), encoding='utf8'))
+
+PRI = {'launch': ('p1', 'أساسي للإطلاق'), 'important': ('p2', 'مهم'), 'later': ('p3', 'لاحقاً'), 'foundation': ('p4', 'بنية مؤجلة')}
+PRI_ORDER = ['launch', 'important', 'later', 'foundation']
+
+MODULES = [  # (البادئة, الاسم, المجموعة في الملف)
+    ('REG', 'الامتثال: برنامج «هدف»'), ('CUS', 'تطبيق العميل'), ('CRT', 'السلة والدفع'), ('ORD', 'دورة الطلب'),
+    ('PAY', 'الدفع والرسوم والتسويات'), ('CAT', 'كتالوج المارت'), ('MER', 'التاجر والفروع'), ('DRV', 'المندوب'),
+    ('DSP', 'التوزيع والمدن'), ('FLT', 'شركات التوصيل'), ('ADM', 'الإدارة'), ('SUP', 'الدعم'),
+    ('MKT', 'العروض والإعلانات والولاء'), ('EXT', 'الخدمات'), ('INT', 'الربط مع الخدمات'), ('PHR', 'الصيدليات'),
+    ('REP', 'التقارير'), ('SYS', 'البناء والتشغيل'), ('TAX', 'Taxi'),
+]
+MOD_NAME = dict(MODULES)
+
+SURF = [  # (المعرّف في الملف, الاسم, الوصف, رمز الصفحات)
+    ('customer', 'تطبيق العميل', 'المتاجر والسلة والطلب والتتبع والرصيد.', 'C'),
+    ('merchant', 'تطبيق التاجر', 'التجهيز والتسليم والمنيو والفريق.', 'M'),
+    ('merchant-dash', 'لوحة التاجر', 'التقارير والمستحقات والفروع والصلاحيات (موقع ويب).', 'MD'),
+    ('driver', 'تطبيق المندوب', 'المهام والاستلام والتسليم والأداء والأرباح.', 'D'),
+    ('admin', 'لوحة الإدارة', 'التشغيل وملف التاجر والحسابات والدعم والإعدادات.', 'A'),
+]
+SURF_NAME = {s[0]: s[1] for s in SURF}
+
+REQ = {r['id']: r for r in D['requirements']}
+PAGES = {p['id']: p for p in D['pages']}
+USED = {}
+for p in D['pages']:
+    for r in p['refs']:
+        USED.setdefault(r, []).append(p['id'])
+
+
+def esc(s):
+    return html.escape(str(s), quote=False)
+
+
+def attr(s):
+    return html.escape(str(s), quote=True)
+
+
+ID_RE = re.compile(r'(?<![\w-])((?:[A-Z]{3}-\d{2,3})|TAX-FND|CFG-01|DATA-01|INT-SEL|D-\d{2})(?![\w-])')
+
+
+def link_ids(text):
+    """يحوّل معرّفات المتطلبات داخل نص (بعد الهروب) إلى روابط."""
+    def rep(m):
+        i = m.group(1)
+        if i in REQ:
+            return '<a class="rid" href="#%s">%s</a>' % (i, i)
+        if i in ('CFG-01', 'INT-SEL', 'DATA-01'):
+            return '<a class="rid" href="#prelaunch">%s</a>' % i
+        return '<bdi class="rid">%s</bdi>' % i
+    return ID_RE.sub(rep, text)
+
+
+def fmt(text):
+    """نص عادي → HTML آمن مع روابط المعرّفات ونظافة الفراغات حول الأقواس."""
+    t = esc(text)
+    t = re.sub(r'\(\s+', '(', t)
+    t = re.sub(r'\s+\)', ')', t)
+    t = re.sub(r'\s{2,}', ' ', t).strip()
+    return link_ids(t)
+
+
+def tag(pri):
+    k, label = PRI[pri]
+    return '<span class="tag %s">%s</span>' % (k, label)
+
+
+def req_link(i, title=True):
+    r = REQ.get(i)
+    if not r:
+        return '<bdi class="rid">%s</bdi>' % esc(i)
+    return '<a class="rid" href="#%s">%s</a>%s' % (i, i, (' ' + esc(r['title'])) if title else '')
+
+
+def tbl(head, rows, cls=''):
+    h = ''.join('<th>%s</th>' % c for c in head)
+    b = ''.join('<tr>%s</tr>' % ''.join('<td>%s</td>' % c for c in r) for r in rows)
+    return '<div class="tbl %s"><table><thead><tr>%s</tr></thead><tbody>%s</tbody></table></div>' % (cls, h, b)
+
+
+def refs_html(ids):
+    return ' · '.join('<a class="rid" href="#%s">%s</a>' % (i, i) if i in REQ else '<bdi class="rid">%s</bdi>' % i for i in ids)
+
+
+def lines(text):
+    """يفصل المقاطع المفصولة بـ«؛» إلى أسطر ليسهل مسح القيم المضغوطة."""
+    parts = [p.strip() for p in re.split(r'[؛;]', str(text)) if p.strip()]
+    return '<br>'.join(fmt(p) for p in parts)
