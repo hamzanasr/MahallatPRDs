@@ -2,7 +2,7 @@
 """تحقق: كل ما في ملف المالك موجود في الموقع الجديد."""
 import json, re, sys
 from bs4 import BeautifulSoup
-from b4_common import D, D_ORIG, FIXES, DEC  # D = ملف المالك بعد التصحيحات والقرارات
+from b4_common import D, D_ORIG, FIXES, DEC, DEC_LOG  # D = ملف المالك بعد التصحيحات والقرارات
 import collections
 site = sys.argv[1] if len(sys.argv) > 1 else 'site4/index.html'
 h = open(site, encoding='utf8').read()
@@ -17,7 +17,7 @@ req = {d['id']: d for d in s.select('#catalog details.req')}
 print('requirements', len(req), 'of', len(D['requirements']))
 fixes = FIXES
 ORIG = {r['id']: r for r in D_ORIG['requirements']}
-changed = set(fixes) | set(DEC.REQ)
+changed = set(fixes) | set(DEC.REQ) | {x[0] for x in DEC_LOG}
 for r in D['requirements']:
     d = req.get(r['id'])
     if not d: print('MISSING', r['id']); bad += 1; continue

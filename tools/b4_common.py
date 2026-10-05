@@ -25,6 +25,38 @@ for _r in D['requirements']:
         if _d.get('priority'):
             _r['priority'] = _d['priority']
 assert {x[0] for x in DEC_LOG} == set(DEC.REQ), set(DEC.REQ) - {x[0] for x in DEC_LOG}
+
+# الجولة الثالثة: مقترحات مراجعة الصفحات التي اعتمدها المالك (إضافة قواعد واستبدال ما يخالفها)
+import b4_decisions3 as DEC3
+_by = {r['id']: r for r in D['requirements']}
+_log = {x[0]: x for x in DEC_LOG}
+_ids3 = {}
+
+
+def _touch(rid, n):
+    r = _by[rid]
+    if rid not in _log:
+        _log[rid] = (rid, [], list(r['rules']), list(r['acceptance']), r['priority'])
+        DEC_LOG.append(_log[rid])
+    if n not in _log[rid][1]:
+        _log[rid][1].append(n)
+    _ids3.setdefault(n, [])
+    if rid not in _ids3[n]:
+        _ids3[n].append(rid)
+    return r
+
+
+for _n, _rid, _old, _new in DEC3.REPLACE:
+    _r = _touch(_rid, _n)
+    _k = next(k for k in ('rules', 'acceptance') if any(x.startswith(_old) for x in _r[k]))
+    _r[_k] = [(_new if x.startswith(_old) else x) for x in _r[_k] if _new is not None or not x.startswith(_old)]
+for _n, _rid, _kind, _txt in DEC3.ADD:
+    _r = _touch(_rid, _n)
+    _r['rules' if _kind == 'R' else 'acceptance'].append(_txt)
+DEC.DECISIONS.extend((n, t, d, _ids3.get(n, [])) for n, t, d in DEC3.DECISIONS)
+DEC.SETTING_EDITS.update(DEC3.SETTING_EDITS)
+DEC.SETTING_ADD[0] = ('رسوم التوصيل', 'المطاعم والمحلات: 9 ر.س تشمل 3 كم + 1.5 لكل كيلو، حد 9–25؛ المارت والصيدليات: 12 ر.س تشمل 3 كم + 1.5 لكل كيلو، حد 12–30',
+                      'عام للنظام وإعداد اختياري لكل مدينة', 'المال والرسوم', ['PAY-013'])
 SETTING_REFS_ADD = []
 for _i, _row in DEC.SETTING_EDITS.items():
     D['settings'][_i] = list(_row)

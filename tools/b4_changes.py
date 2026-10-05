@@ -116,14 +116,18 @@ def notes_section(num, notes, log):
                 cur = q['topic']
                 rows += '<tr><td colspan="4"><b>%s</b></td></tr>' % esc(cur)
             rows += '<tr><td>%d</td><td>%s</td><td>%s</td><td>%s %s</td></tr>' % (i, fmt(q['q']), fmt(q.get('proposal', '')), pl(q.get('pages', [])), refs_html(q.get('reqs', [])))
-        pq_html = ('<h3>أسئلة من مراجعة الصفحات (%d)</h3><p>ظهرت أثناء إكمال الصفحات وتحسين تجربة الاستخدام، بعد حذف ما حسمته قراراتك ودمج المكرر. لكل سؤال اقتراح نبدأ به إن لم يُحسم.</p>' % len(Q['questions']) +
-                   '<div class="tbl tbl-notes"><table><thead><tr><th>#</th><th>السؤال</th><th>المقترح</th><th>الصفحات والمتطلبات</th></tr></thead><tbody>%s</tbody></table></div>' % rows)
+        if Q['questions']:
+                pq_html = ('<h3>أسئلة من مراجعة الصفحات (%d)</h3><p>ظهرت أثناء إكمال الصفحات وتحسين تجربة الاستخدام، بعد حذف ما حسمته قراراتك ودمج المكرر. لكل سؤال اقتراح نبدأ به إن لم يُحسم.</p>' % len(Q['questions']) +
+                       '<div class="tbl tbl-notes"><table><thead><tr><th>#</th><th>السؤال</th><th>المقترح</th><th>الصفحات والمتطلبات</th></tr></thead><tbody>%s</tbody></table></div>' % rows)
+        elif Q.get('approved'):
+            pq_html = '<h3>أسئلة مراجعة الصفحات</h3><p>اعتمد المالك المقترحات الـ%d كلها، وكُتبت في المتطلبات (القرارات 30 إلى 71 في «قرارات 5 أكتوبر»).</p>' % len(Q['approved'])
         if Q.get('dev_notes'):
             pq_html += '<details class="rep"><summary><b>ملاحظات تقنية للمبرمج</b> <span class="cnt">%d</span></summary>%s</details>' % (
                 len(Q['dev_notes']), tbl(['الملاحظة', 'الصفحات'], [[fmt(n['note']), pl(n.get('pages', []))] for n in Q['dev_notes']], 'tbl-notes'))
         pq = []
     if pq:
-        pq_html = ('<h3>أسئلة من مراجعة الصفحات (%d)</h3><p>ظهرت أثناء إكمال عناصر الصفحات وتحسين تجربة الاستخدام. لم أقرر فيها شيئاً.</p>' % len(pq) +
+        if Q['questions']:
+                pq_html = ('<h3>أسئلة من مراجعة الصفحات (%d)</h3><p>ظهرت أثناء إكمال عناصر الصفحات وتحسين تجربة الاستخدام. لم أقرر فيها شيئاً.</p>' % len(pq) +
                    tbl(['الصفحة', 'السؤال'], [['<a href="#p-%s"><bdi class="rid">%s</bdi> %s</a>' % (i, i, esc(t)), fmt(q)] for i, t, q in pq], 'tbl-notes'))
     lrows = [['<a class="rid" href="#%s">%s</a>' % (e['id'], e['id']), esc(e['old']), esc(e['new']) if e['new'] else '<i>حُذف</i>', esc(e['why'])] for e in log]
     edits = tbl(['المتطلب', 'قبل', 'بعد', 'السبب'], lrows, 'tbl-notes')
