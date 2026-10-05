@@ -2,8 +2,9 @@
 """تحقق: كل ما في ملف المالك موجود في الموقع الجديد."""
 import json, re, sys
 from bs4 import BeautifulSoup
-D = json.load(open('newprd.json', encoding='utf8'))
-site = sys.argv[1] if len(sys.argv) > 1 else '../index.html'
+from b4_common import D, D_ORIG, FIXES, DEC  # D = ملف المالك بعد التصحيحات والقرارات
+import collections
+site = sys.argv[1] if len(sys.argv) > 1 else 'site4/index.html'
 h = open(site, encoding='utf8').read()
 s = BeautifulSoup(h, 'lxml')
 for m in s.select('.mock'): m.decompose()
@@ -14,21 +15,23 @@ def norm(t): return re.sub(r'[\s]+', ' ', t).strip()
 # المتطلبات
 req = {d['id']: d for d in s.select('#catalog details.req')}
 print('requirements', len(req), 'of', len(D['requirements']))
-fixes = json.load(open('qa/fixes.json', encoding='utf8'))
+fixes = FIXES
+ORIG = {r['id']: r for r in D_ORIG['requirements']}
+changed = set(fixes) | set(DEC.REQ)
 for r in D['requirements']:
     d = req.get(r['id'])
     if not d: print('MISSING', r['id']); bad += 1; continue
     got = [norm(x.get_text(' ')) for x in d.select('.rbody li')]
-    src = fixes.get(r['id'], {}).get('rules', r['rules']) + fixes.get(r['id'], {}).get('acceptance', r['acceptance'])
+    src = r['rules'] + r['acceptance']
     if len(got) != len(src): print('COUNT', r['id'], len(got), len(src)); bad += 1
-    orig_nums = nums(' '.join(r['rules'] + r['acceptance']))
-    if r['id'] not in fixes and nums(' '.join(got)) != orig_nums: print('NUMS', r['id']); bad += 1
+    o = ORIG[r['id']]
+    orig_nums = nums(' '.join(o['rules'] + o['acceptance']))
+    if r['id'] not in changed and nums(' '.join(got)) != orig_nums: print('NUMS', r['id']); bad += 1
     if d['data-p'] != {'launch': 'p1', 'important': 'p2', 'later': 'p3', 'foundation': 'p4'}[r['priority']]: print('PRI', r['id']); bad += 1
 # الأرقام في المتطلبات المحرَّرة: أي رقم ضاع من المتطلب بعد التحرير؟
-for rid, f in fixes.items():
-    r = next(x for x in D['requirements'] if x['id'] == rid)
+for rid in sorted(changed):
+    r = ORIG[rid]; f = next(x for x in D['requirements'] if x['id'] == rid)
     a = nums(' '.join(r['rules'] + r['acceptance'])); b = nums(' '.join(f['rules'] + f['acceptance']))
-    import collections
     lost = collections.Counter(a) - collections.Counter(b)
     if lost: print('EDIT-LOST-NUMBERS', rid, dict(lost))
 # الصفحات

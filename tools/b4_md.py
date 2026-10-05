@@ -3,6 +3,7 @@
 from b4_common import *
 import b4_front as F
 import b4_pages as P
+import b4_annex as X
 
 
 def markdown(fixes):
@@ -12,6 +13,13 @@ def markdown(fixes):
     w('')
     w('%s · المراجعة %s · %d متطلباً · %d صفحة. المتطلبات هي المرجع.' % (F.DATE, F.REVISION, F.N_REQ, F.N_PAGES))
     w('')
+    L.extend(X.decisions_md())
+    for sid, title, sub, blocks in X.ANNEX:
+        w('## ' + title)
+        w('')
+        w(sub)
+        w('')
+        L.extend(X.blocks_md(blocks))
     w('## الإعدادات (القيم الافتراضية القابلة للضبط)')
     w('')
     w('| الإعداد | القيمة | الحدود والأثر |')

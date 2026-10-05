@@ -7,11 +7,12 @@ import b4_rules as R
 import b4_front as F
 import b4_changes as C
 import b4_md as M
+import b4_annex as X
 
 OUT = sys.argv[1] if len(sys.argv) > 1 else (os.path.dirname(HERE) if os.path.basename(HERE) == 'tools' else os.path.join(HERE, 'site4'))
 
 # إصلاحات لغوية معتمدة وملاحظات المالك
-FIXES = json.load(open(os.path.join(HERE, 'qa', 'fixes.json'), encoding='utf8')) if os.path.exists(os.path.join(HERE, 'qa', 'fixes.json')) else {}
+FIXES = {}  # التصحيحات والقرارات مطبّقة على D في b4_common
 NOTES = json.load(open(os.path.join(HERE, 'qa', 'notes.json'), encoding='utf8')) if os.path.exists(os.path.join(HERE, 'qa', 'notes.json')) else []
 EDITLOG = json.load(open(os.path.join(HERE, 'qa', 'edit_log.json'), encoding='utf8')) if os.path.exists(os.path.join(HERE, 'qa', 'edit_log.json')) else []
 
@@ -39,15 +40,22 @@ add('scope', 'نطاق الإصدار الأول', 'البداية', F.scope_sec
 add('prelaunch', 'قبل التشغيل', 'البداية', F.prelaunch_section(nxt()))
 add('glossary', 'المصطلحات', 'البداية', F.glossary_section(nxt()))
 add('flows', 'رحلة الطلب', 'قواعد العمل', P.flows_section(nxt()))
+add('order-states', 'حالات الطلب لكل نوع', 'قواعد العمل', X.annex_section('order-states', nxt()))
+add('dispatch', 'خوارزمية التوزيع', 'قواعد العمل', X.annex_section('dispatch', nxt()))
 add('money', 'الحسابات والرسوم', 'قواعد العمل', R.money_section(nxt()))
+add('closing', 'إغلاق الطلب دون تسليم', 'قواعد العمل', X.annex_section('closing', nxt()))
 add('settings', 'القيم المرنة', 'قواعد العمل', R.settings_section(nxt()))
+add('roles', 'الأدوار والصلاحيات', 'قواعد العمل', X.annex_section('roles', nxt()))
 add('integrations', 'الربط مع الخدمات', 'قواعد العمل', R.integrations_section(nxt()))
 add('quality', 'الجودة والتشغيل', 'قواعد العمل', R.quality_section(nxt()))
 add('states', 'حالات الصفحات المشتركة', 'الواجهات', F.states_section(nxt()))
 for sid, name, desc, _ in SURF:
     add('s-' + sid, name, 'الواجهات', P.surface_section(nxt(), sid, name, desc))
+add('admin-detail', 'تفاصيل صفحات الإدارة', 'الواجهات', X.annex_section('admin-detail', nxt()))
 add('reports', 'التقارير', 'الواجهات', R.reports_section(nxt()))
+add('kpi', 'تعريف المؤشرات', 'الواجهات', X.annex_section('kpi', nxt()))
 add('catalog', 'فهرس المتطلبات', 'للتنفيذ', F.catalog_section(nxt(), FIXES))
+add('decisions', 'قرارات 5 أكتوبر', 'للتنفيذ', X.decisions_section(nxt()))
 add('changes', 'ما تغيّر عن 3.3', 'للتنفيذ', C.changes_section(nxt()))
 add('notes', 'مسائل للمالك', 'للتنفيذ', C.notes_section(nxt(), NOTES, EDITLOG))
 

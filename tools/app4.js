@@ -251,6 +251,7 @@
         '<div class="row"><span>التوصيل</span><b>' + m(dl) + '</b></div>' +
         '<div class="row"><span>خدمة 2.5% دون الإكرامية</span><b>' + m(fee) + '</b></div>' +
         '<div class="row"><span>الإكرامية</span><b>' + m(tip) + '</b></div>' +
+        '<div class="row"><span>يصل للمندوب من الإكرامية بعد خصم 15%</span><b>' + m(r2(tip * 0.85)) + '</b></div>' +
         '<div class="row"><span>خصم نسبة التاجر</span><b>' + m(mf) + '</b></div>' +
         '<div class="row"><span>مستحق المنتجات للتاجر</span><b>' + m(b - mf) + '</b></div>' +
         '<p>قبل ضريبة رسوم المنصة وتمويل العروض والاسترداد والغرامة اليدوية. لا رسم دفع إلكتروني للمارت.</p>';
