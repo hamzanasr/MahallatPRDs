@@ -93,7 +93,7 @@ def notes_section(num, notes, log):
     n_res = len(DEC.RESOLVED_KEY) + len(DEC.RESOLVED_NOTES)
     notes = [n for i, n in enumerate(notes) if not n['key'] and i not in DEC.RESOLVED_NOTES]
     krows = [[str(i + 1), refs_html([rid]), fmt(t)] for i, (rid, t) in enumerate(DEC.PENDING)]
-    top = tbl(['#', 'المتطلب', 'السؤال'], krows, 'tbl-notes')
+    top = tbl(['#', 'المتطلب', 'السؤال'], krows, 'tbl-notes') if krows else '<p>لا يوجد سؤال مفتوح: حسم المالك كل المسائل المهمة.</p>'
     key = DEC.PENDING
     by = collections.OrderedDict()
     for m, name in MODULES:

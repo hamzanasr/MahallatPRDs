@@ -54,6 +54,7 @@ for _n, _rid, _kind, _txt in DEC3.ADD:
     _r = _touch(_rid, _n)
     _r['rules' if _kind == 'R' else 'acceptance'].append(_txt)
 DEC.DECISIONS.extend((n, t, d, _ids3.get(n, [])) for n, t, d in DEC3.DECISIONS)
+DEC.DECISIONS.sort(key=lambda x: x[0])
 DEC.SETTING_EDITS.update(DEC3.SETTING_EDITS)
 DEC.SETTING_ADD[0] = ('رسوم التوصيل', 'المطاعم والمحلات: 9 ر.س تشمل 3 كم + 1.5 لكل كيلو، حد 9–25؛ المارت والصيدليات: 12 ر.س تشمل 3 كم + 1.5 لكل كيلو، حد 12–30',
                       'عام للنظام وإعداد اختياري لكل مدينة', 'المال والرسوم', ['PAY-013'])
