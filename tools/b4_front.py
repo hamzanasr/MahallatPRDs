@@ -4,7 +4,7 @@ import collections
 from b4_common import *
 from b4_pages import STD_STATES
 
-VERSION = '4.4'
+VERSION = '4.5'
 DATE = '5 أكتوبر 2026'
 REVISION = D['revision']
 
