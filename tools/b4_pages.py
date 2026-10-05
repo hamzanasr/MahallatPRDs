@@ -35,6 +35,17 @@ def sprite_defs():
 
 
 # ---------------------------------------------------------------- صفحة واحدة
+def _mock_html(pid, html, cap):
+    html = UXM.fix_sidebar(html, pid, D)
+    return '<figure class="mock-fig"><div class="mock" aria-hidden="true" inert>%s</div><figcaption class="mock-cap">%s</figcaption></figure>' % (clean_preview(html), esc(cap))
+
+
+def _block(title, items):
+    if not items:
+        return ''
+    return '<div class="sc2"><h4><i></i>%s</h4><ul>%s</ul></div>' % (title, ''.join('<li>%s</li>' % fmt(x) for x in items))
+
+
 def page_html(p, with_mock=True):
     pid = p['id']
     reqs = []
@@ -44,23 +55,36 @@ def page_html(p, with_mock=True):
     nxt = ' · '.join('<a href="#p-%s"><bdi class="rid">%s</bdi> %s</a>' % (l, l, esc(PAGES[l]['title'])) for l in p['links'])
     nxt_html = ('<div class="sc2"><h4><i></i>تنتقل إلى</h4><p>%s</p></div>' % nxt) if nxt else ''
     fields = ''.join('<li>%s</li>' % fmt(x) for x in p['fields'])
-    acts = ''.join('<span class="chip">%s</span>' % esc(x) for x in p['actions'])
-    extra = ''
-    std = set(STD_STATES)
-    own = [s for s in p['states'] if s not in std]
-    if own:
-        extra = '<div class="sc2"><h4><i></i>حالات خاصة بهذه الصفحة</h4><ul>%s</ul></div>' % ''.join('<li>%s</li>' % fmt(s) for s in own)
+    if p.get('acts') and any(a.get('result') for a in p['acts']):
+        acts = '<div class="sc2 wide"><h4><i></i>الإجراءات وما يحدث عند كل منها</h4>%s</div>' % tbl(
+            ['الإجراء', 'ماذا يحدث'], [['<b>%s</b>' % esc(a['name']), fmt(a.get('result') or '—')] for a in p['acts']], 'tbl-acts')
+    else:
+        acts = '<div class="sc2"><h4><i></i>الإجراءات</h4><div class="chips">%s</div></div>' % ''.join('<span class="chip">%s</span>' % esc(x) for x in p['actions'])
+    own = [s for s in p['states'] if s not in set(STD_STATES)]
     mock = ''
-    if with_mock and pid in PREV:
-        mock = '<div class="mock-wrap"><div class="mock" aria-hidden="true" inert>%s</div><p class="mock-cap">معاينة توضيحية لترتيب الصفحة؛ الأرقام والأسماء تجريبية.</p></div>' % clean_preview(PREV[pid])
-    return ('<details class="page" id="p-%s"><summary><span class="pn"><bdi class="rid">%s</bdi> %s</span><span class="ps">%s</span></summary>'
+    if with_mock:
+        m1 = UX_MOCKS.get(pid) or PREV.get(pid)
+        figs = []
+        if m1:
+            figs.append(_mock_html(pid, m1, 'معاينة توضيحية لترتيب الصفحة؛ الأرقام والأسماء تجريبية.'))
+        if pid in UX_MOCKS2:
+            figs.append(_mock_html(pid, UX_MOCKS2[pid], p.get('mock2_caption') or 'حالة أخرى للصفحة نفسها.'))
+        if figs:
+            desk = 'mk desk' in (m1 or '')
+            mock = '<div class="mock-wrap%s">%s</div>' % (' pair' if len(figs) > 1 and not desk else '', ''.join(figs))
+    new_tag = ' <span class="tag p2">جديدة</span>' if p.get('new') else ''
+    pri_tag = (' ' + tag(p['priority'])) if p.get('priority') and p['priority'] != 'launch' else ''
+    return ('<details class="page" id="p-%s"><summary><span class="pn"><bdi class="rid">%s</bdi> %s%s%s</span><span class="ps">%s</span></summary>'
             '<div class="pbody">%s<div class="pspec">'
-            '<div class="sc2"><h4><i></i>عناصر الصفحة</h4><ul>%s</ul></div>'
-            '<div class="sc2"><h4><i></i>الإجراءات</h4><div class="chips">%s</div></div>'
-            '%s'
+            '<div class="sc2 wide fields"><h4><i></i>عناصر الصفحة</h4><ul>%s</ul></div>'
+            '%s%s%s%s%s'
             '<div class="sc2"><h4><i></i>المتطلبات التي تحكمها</h4><ul class="reqlist">%s</ul></div>'
             '%s'
-            '</div></div></details>') % (pid, pid, esc(p['title']), esc(p['purpose']), mock, fields, acts, extra, ''.join(reqs), nxt_html)
+            '</div></div></details>') % (
+        pid, pid, esc(p['title']), new_tag, pri_tag, esc(p['purpose']), mock, fields, acts,
+        _block('حالات خاصة بهذه الصفحة', own), _block('التحقق ورسائل الخطأ', p.get('validation')),
+        _block('الصلاحيات', p.get('permissions')), _block('قرارات تجربة الاستخدام', p.get('ux')),
+        ''.join(reqs), nxt_html)
 
 
 STD_STATES = D['pages'][0]['states']

@@ -104,11 +104,32 @@ def notes_section(num, notes, log):
     for m, items in by.items():
         rows = [[refs_html(n['ids']), '<b>%s</b> %s' % (KIND_LABEL[n['kind']], fmt(n['text'])), fmt(n['ask'])] for n in items]
         rest += '<details class="rep"><summary><b>%s</b> <span class="cnt">%d</span></summary>%s</details>' % (esc(MOD_NAME[m]), len(items), tbl(['المتطلبات', 'المسألة', 'السؤال أو الاقتراح'], rows, 'tbl-notes'))
+    pq = [(pg['id'], pg['title'], q) for pg in D['pages'] for q in pg.get('questions', [])]
+    pq_html = ''
+    qf = os.path.join(HERE, 'ux', 'questions.json')
+    if os.path.exists(qf):  # الأسئلة بعد الدمج والتصفية
+        Q = json.load(open(qf, encoding='utf8'))
+        pl = lambda ids: ' '.join('<a href="#p-%s"><bdi class="rid">%s</bdi></a>' % (i, i) for i in ids if i in PAGES)
+        rows, cur = '', None
+        for i, q in enumerate(Q['questions'], 1):
+            if q['topic'] != cur:
+                cur = q['topic']
+                rows += '<tr><td colspan="4"><b>%s</b></td></tr>' % esc(cur)
+            rows += '<tr><td>%d</td><td>%s</td><td>%s</td><td>%s %s</td></tr>' % (i, fmt(q['q']), fmt(q.get('proposal', '')), pl(q.get('pages', [])), refs_html(q.get('reqs', [])))
+        pq_html = ('<h3>أسئلة من مراجعة الصفحات (%d)</h3><p>ظهرت أثناء إكمال الصفحات وتحسين تجربة الاستخدام، بعد حذف ما حسمته قراراتك ودمج المكرر. لكل سؤال اقتراح نبدأ به إن لم يُحسم.</p>' % len(Q['questions']) +
+                   '<div class="tbl tbl-notes"><table><thead><tr><th>#</th><th>السؤال</th><th>المقترح</th><th>الصفحات والمتطلبات</th></tr></thead><tbody>%s</tbody></table></div>' % rows)
+        if Q.get('dev_notes'):
+            pq_html += '<details class="rep"><summary><b>ملاحظات تقنية للمبرمج</b> <span class="cnt">%d</span></summary>%s</details>' % (
+                len(Q['dev_notes']), tbl(['الملاحظة', 'الصفحات'], [[fmt(n['note']), pl(n.get('pages', []))] for n in Q['dev_notes']], 'tbl-notes'))
+        pq = []
+    if pq:
+        pq_html = ('<h3>أسئلة من مراجعة الصفحات (%d)</h3><p>ظهرت أثناء إكمال عناصر الصفحات وتحسين تجربة الاستخدام. لم أقرر فيها شيئاً.</p>' % len(pq) +
+                   tbl(['الصفحة', 'السؤال'], [['<a href="#p-%s"><bdi class="rid">%s</bdi> %s</a>' % (i, i, esc(t)), fmt(q)] for i, t, q in pq], 'tbl-notes'))
     lrows = [['<a class="rid" href="#%s">%s</a>' % (e['id'], e['id']), esc(e['old']), esc(e['new']) if e['new'] else '<i>حُذف</i>', esc(e['why'])] for e in log]
     edits = tbl(['المتطلب', 'قبل', 'بعد', 'السبب'], lrows, 'tbl-notes')
     return ('<section id="notes"><h2><span class="num">%d</span>مسائل للمالك</h2>'
             '<p class="sub">راجعتُ نص المتطلبات بحثاً عمّا يترك المبرمج يخمّن: تعارض بين متطلبين، وغموض، وبند ناقص، وتكرار قد يتباعد. حسمت قرارات 5 أكتوبر ' + str(n_res) + ' مسألة وكُتبت في المتطلبات. ما بقي هنا، وما كان تصحيحاً لغوياً خالصاً طبّقته وسجّلته في الجدول الأخير.</p>'
             '<h3>بقي مفتوحاً بعد قرارات 5 أكتوبر (%d)</h3><p>أسئلة لم تُحسم، وافتراضات كتبتها في المتطلبات وتحتاج تأكيدك. يُفضَّل حسمها قبل برمجة المتطلب.</p>%s'
-            '<h3>بقية المسائل حسب الوحدة (%d)</h3>%s'
+            '%s<h3>بقية المسائل حسب الوحدة (%d)</h3>%s'
             '<h3>تصحيحات لغوية طبّقتها (%d)</h3><p>لا تغيّر قراراً: إكمال بنود ناقصة، وإزالة بقايا تحرير وتكرار صريح، وتصحيح فاعل أو ضمير. النص الأصلي في عمود «قبل».</p>%s</section>') % (
-        num, len(key), top, len(notes), rest, len(log), edits)
+        num, len(key), top, pq_html, len(notes), rest, len(log), edits)

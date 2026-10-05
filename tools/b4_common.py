@@ -36,6 +36,10 @@ for _pid, _k, _old, _new in DEC.PAGE_EDITS:
     _p[_k] = [_new if x == _old else x for x in _p[_k]]
     assert _new in _p[_k]
 
+# 3) مراجعة الصفحات: عناصر ناقصة، وسلوك الإجراءات، وصفحات جديدة، ومعاينات محسّنة
+import b4_ux as UXM
+UX_MOCKS, UX_MOCKS2 = UXM.apply(D, {r['id'] for r in D['requirements']}, HERE)
+
 PRI = {'launch': ('p1', 'أساسي للإطلاق'), 'important': ('p2', 'مهم'), 'later': ('p3', 'لاحقاً'), 'foundation': ('p4', 'بنية مؤجلة')}
 PRI_ORDER = ['launch', 'important', 'later', 'foundation']
 

@@ -76,7 +76,10 @@ html_out = (tpl.replace('{{NAV}}', nav_html).replace('{{BODY}}', '\n'.join(body)
 os.makedirs(os.path.join(OUT, 'assets'), exist_ok=True)
 open(os.path.join(OUT, 'index.html'), 'w', encoding='utf8').write(html_out)
 shutil.copy(os.path.join(HERE, 'style4.css'), os.path.join(OUT, 'assets', 'style.css'))
-shutil.copy(os.path.join(HERE, 'mock4.css'), os.path.join(OUT, 'assets', 'mock.css'))
+open(os.path.join(OUT, 'assets', 'mock.css'), 'w', encoding='utf8').write(
+    open(os.path.join(HERE, 'mock4.css'), encoding='utf8').read() + chr(10) + open(os.path.join(HERE, 'mock_ux.css'), encoding='utf8').read())
+for _w in UXM.LOG:
+    print('UX:', _w)
 shutil.copy(os.path.join(HERE, 'app4.js'), os.path.join(OUT, 'assets', 'app.js'))
 open(os.path.join(OUT, 'prd.md'), 'w', encoding='utf8').write(M.markdown(FIXES))
 print('written', OUT, len(html_out), 'sections', len(nav), 'reqs', F.N_REQ, 'pages', F.N_PAGES, 'icons', len(P.SPRITE))

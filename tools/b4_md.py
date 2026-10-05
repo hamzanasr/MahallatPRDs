@@ -57,12 +57,22 @@ def markdown(fixes):
         for p in D['pages']:
             if p['surface'] != sid:
                 continue
-            w('#### %s — %s' % (p['id'], p['title']))
+            w('#### %s — %s%s' % (p['id'], p['title'], ' (جديدة)' if p.get('new') else ''))
             w('')
             w(p['purpose'])
             w('')
             w('- العناصر: ' + '، '.join(p['fields']))
-            w('- الإجراءات: ' + '، '.join(p['actions']))
+            if p.get('acts') and any(x.get('result') for x in p['acts']):
+                w('- الإجراءات وما يحدث:')
+                for x in p['acts']:
+                    w('  - **%s**: %s' % (x['name'], x.get('result') or '—'))
+            else:
+                w('- الإجراءات: ' + '، '.join(p['actions']))
+            for k, lab in (('validation', 'التحقق ورسائل الخطأ'), ('permissions', 'الصلاحيات'), ('ux', 'قرارات تجربة الاستخدام')):
+                if p.get(k):
+                    w('- %s:' % lab)
+                    for x in p[k]:
+                        w('  - ' + x)
             w('- المتطلبات: ' + ' '.join(p['refs']))
             if p['links']:
                 w('- تنتقل إلى: ' + ' '.join(p['links']))

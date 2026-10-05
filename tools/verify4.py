@@ -10,7 +10,7 @@ s = BeautifulSoup(h, 'lxml')
 for m in s.select('.mock'): m.decompose()
 bad = 0
 def nums(t): return sorted(re.findall(r'\d+(?:[.,]\d+)?', re.sub(r'\b[A-Z]{3}-\d{2,3}\b', ' ', t)))
-def norm(t): return re.sub(r'[\s]+', ' ', t).strip()
+def norm(t): return re.sub(r'\s*([()،:؛])\s*', lambda m: m.group(1), re.sub(r'\s+', ' ', t)).strip()
 
 # المتطلبات
 req = {d['id']: d for d in s.select('#catalog details.req')}

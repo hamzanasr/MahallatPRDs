@@ -290,7 +290,7 @@ footer{color:var(--muted);font-size:14px;padding-top:16px;border-top:1px solid v
 .tbl-set table,.tbl-ex table{min-width:680px}
 .tbl-ex td:first-child{font-weight:600}
 td b{font-weight:600}
-h4 small,h3 small{font-size:12.5px;color:var(--muted);font-weight:500;background:var(--surface2);border-radius:999px;padding:0 9px;margin-inline-start:6px}
+h4:not(.mock h4) small,h3:not(.mock h3) small{font-size:12.5px;color:var(--muted);font-weight:500;background:var(--surface2);border-radius:999px;padding:0 9px;margin-inline-start:6px}
 .cnt{font-size:12.5px;color:var(--muted);font-weight:500;background:var(--surface2);border-radius:999px;padding:0 9px;margin-inline-start:6px}
 h4{font-size:16px;margin:18px 0 6px}
 .open-items{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:12px;margin:10px 0 14px}
@@ -359,3 +359,13 @@ details.flow-txt ol{margin:6px 0 0;padding-inline-start:24px}
 .receipt p{margin:10px 0 0;font-size:13px;color:var(--muted)}
 @media (max-width:700px){.calc{grid-template-columns:1fr}.cmp{grid-template-columns:1fr}}
 @media print{.mock-wrap{display:none}.flow-box{overflow:visible}}
+/* الإصدار 4.2: مواصفات الصفحة الموسعة ومعاينتان */
+.sc2.wide{grid-column:1/-1}
+.sc2.wide .tbl{margin:6px 0 2px}
+.tbl-acts td:first-child{width:26%}
+.mock-fig{margin:0}
+.mock-fig+.mock-fig{margin-top:18px}
+.mock-wrap.pair{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,390px),1fr));gap:16px;align-items:start}
+.mock-wrap.pair .mock-fig+.mock-fig{margin-top:0}
+.sc2.fields ul{columns:2 300px;column-gap:32px}
+.sc2.fields li{break-inside:avoid}
